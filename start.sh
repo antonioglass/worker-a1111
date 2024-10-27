@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+# Set the path to the config file
+CONFIG_FILE="/stable-diffusion-webui/config.json"
+
+# 1. Check if SD_CHECKPOINTS_LIMIT is set and update config.json if it is
+if [ ! -z "$SD_CHECKPOINTS_LIMIT" ]; then
+  jq --argjson limit "$SD_CHECKPOINTS_LIMIT" '.sd_checkpoints_limit = $limit' "$CONFIG_FILE" > tmp.json && mv tmp.json "$CONFIG_FILE"
+  echo "Updated sd_checkpoints_limit to $SD_CHECKPOINTS_LIMIT"
+fi
+
+# 2. Check if SD_MODEL_CHECKPOINT is set and update config.json if it is
+if [ ! -z "$SD_MODEL_CHECKPOINT" ]; then
+  jq --arg checkpoint "$SD_MODEL_CHECKPOINT" '.sd_model_checkpoint = $checkpoint' "$CONFIG_FILE" > tmp.json && mv tmp.json "$CONFIG_FILE"
+  echo "Updated sd_model_checkpoint to $SD_MODEL_CHECKPOINT"
+fi
+
 echo "Starting WebUI API"
 TCMALLOC="$(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1)"
 export LD_PRELOAD="${TCMALLOC}"
