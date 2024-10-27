@@ -5,7 +5,7 @@ WORKDIR /stable-diffusion-webui/models/Stable-diffusion
 RUN wget https://huggingface.co/antonioglass/models/resolve/main/epicphotogasm_y.safetensors && \
     wget https://huggingface.co/antonioglass/models/resolve/main/semi-realistic_v6.safetensors && \
     wget https://huggingface.co/antonioglass/models/resolve/main/dreamshaper_631Inpainting.safetensors && \
-    wget https://huggingface.co/antonioglass/models/resolve/main/epicphotogasm_z-inpainting.safetensors && \
+    wget https://huggingface.co/antonioglass/models/resolve/main/epicphotogasm_z-inpainting.safetensors
 
 # Download embeddings models
 WORKDIR /stable-diffusion-webui/embeddings
