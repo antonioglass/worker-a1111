@@ -1,0 +1,8 @@
+FROM antonioglass/worker-a1111-base-runpod:1.0.1-xl
+
+# Download Stable Diffusion models
+WORKDIR /stable-diffusion-webui/models/Stable-diffusion
+RUN wget https://huggingface.co/antonioglass/models/resolve/main/cyberrealisticPony_v62.safetensors && \
+    wget https://huggingface.co/antonioglass/models/resolve/main/cyberrealisticPorn_v62_inpainting_vae.inpainting.safetensors
+
+WORKDIR /
