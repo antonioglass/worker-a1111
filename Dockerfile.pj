@@ -1,4 +1,4 @@
-FROM antonioglass/worker-a1111-base-runpod:1.0.1
+FROM antonioglass/worker-a1111:runpod-base-1.0.1
 
 # Download Upscalers
 WORKDIR /stable-diffusion-webui/models/ESRGAN
