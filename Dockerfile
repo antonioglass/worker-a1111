@@ -123,6 +123,7 @@ COPY webui-user.sh config.json ui-config.json ./
 RUN pip install requests runpod==1.6.2 huggingface_hub
 
 # Add RunPod Handler and Docker container start script
+WORKDIR /
 COPY start.sh rp_handler.py ./
 COPY schemas /schemas
 
