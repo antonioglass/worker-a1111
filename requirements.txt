@@ -2,4 +2,4 @@ Pillow
 requests
 huggingface_hub
 python-dotenv
-runpod
+runpod==1.6.2

@@ -19,7 +19,8 @@ export COMMANDLINE_ARGS="--port 3000 --listen --api --xformers"
 #export GIT="git"
 
 # python3 venv without trailing slash (defaults to ${install_dir}/${clone_dir}/venv)
-venv_dir="/workspace/venv"
+# venv_dir="/workspace/venv"
+venv_dir="-" # disabled
 
 # script to launch to start the app
 #export LAUNCH_SCRIPT="launch.py"

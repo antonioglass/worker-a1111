@@ -84,9 +84,7 @@
     "training_enable_tensorboard": false,
     "training_tensorboard_save_images": false,
     "training_tensorboard_flush_every": 120,
-    "sd_model_checkpoint": "deliberate_v2.safetensors",
-    "sd_checkpoints_limit": 1,
-    "sd_checkpoints_keep_in_cpu": true,
+    "sd_checkpoints_keep_in_cpu": false,
     "sd_checkpoint_cache": 0,
     "sd_unet": "Automatic",
     "enable_quantization": false,
@@ -282,5 +280,7 @@
     "controlnet_show_batch_images_in_ui": false,
     "controlnet_increment_seed_during_batch": false,
     "controlnet_disable_openpose_edit": false,
-    "controlnet_ignore_noninpaint_mask": false
+    "controlnet_ignore_noninpaint_mask": false,
+    "sd_model_checkpoint": "epicphotogasm_y.safetensors",
+    "sd_checkpoints_limit": 4
 }

@@ -67,7 +67,7 @@ IMG2IMG_SCHEMA = {
     'scheduler': {
         'type': str,
         'required': False,
-        'default': 'Euler a',
+        'default': 'automatic',
         'constraints': lambda scheduler: scheduler in [
             'automatic',
             'uniform',
@@ -206,12 +206,11 @@ IMG2IMG_SCHEMA = {
         'required': False,
         'default': 0
     },
-    # Setting this as an empty string by default causes the API call to fail
-    # 'mask': {
-    #     'type': str,
-    #     'required': False,
-    #     'default': ''
-    # },
+    'mask': {
+        'type': str,
+        'required': False,
+        'default': ''
+    },
     'mask_blur_x': {
         'type': int,
         'required': False,

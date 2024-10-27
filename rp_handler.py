@@ -1,19 +1,12 @@
 import os
 import time
 import requests
+import base64
 import traceback
 import runpod
-from runpod.serverless.utils.rp_validator import validate
 from runpod.serverless.modules.rp_logger import RunPodLogger
 from requests.adapters import HTTPAdapter, Retry
 from huggingface_hub import HfApi
-from schemas.input import INPUT_SCHEMA
-from schemas.api import API_SCHEMA
-from schemas.img2img import IMG2IMG_SCHEMA
-from schemas.txt2img import TXT2IMG_SCHEMA
-from schemas.interrogate import INTERROGATE_SCHEMA
-from schemas.sync import SYNC_SCHEMA
-from schemas.download import DOWNLOAD_SCHEMA
 
 BASE_URI = 'http://127.0.0.1:3000'
 TIMEOUT = 600
@@ -71,43 +64,6 @@ def send_post_request(endpoint, payload, job_id, retry=0):
             send_post_request(endpoint, payload, job_id, retry)
 
     return response
-
-
-def validate_input(job):
-    return validate(job['input'], INPUT_SCHEMA)
-
-
-def validate_api(job):
-    api = job['input']['api']
-    api['endpoint'] = api['endpoint'].lstrip('/')
-
-    return validate(api, API_SCHEMA)
-
-
-def validate_payload(job):
-    method = job['input']['api']['method']
-    endpoint = job['input']['api']['endpoint']
-    payload = job['input']['payload']
-    validated_input = payload
-
-    if endpoint == 'v1/sync':
-        logger.info(f'Validating /{endpoint} payload', job['id'])
-        validated_input = validate(payload, SYNC_SCHEMA)
-    elif endpoint == 'v1/download':
-        logger.info(f'Validating /{endpoint} payload', job['id'])
-        validated_input = validate(payload, DOWNLOAD_SCHEMA)
-    elif endpoint == 'sdapi/v1/txt2img':
-        logger.info(f'Validating /{endpoint} payload', job['id'])
-        validated_input = validate(payload, TXT2IMG_SCHEMA)
-    elif endpoint == 'sdapi/v1/img2img':
-        logger.info(f'Validating /{endpoint} payload', job['id'])
-        validated_input = validate(payload, IMG2IMG_SCHEMA)
-    elif endpoint == 'sdapi/v1/interrogate' and method == 'POST':
-        logger.info(f'Validating /{endpoint} payload', job['id'])
-        validated_input = validate(payload, INTERROGATE_SCHEMA)
-
-    return endpoint, job['input']['api']['method'], validated_input
-
 
 def download(job):
     source_url = job['input']['payload']['source_url']
@@ -172,36 +128,44 @@ def sync(job):
         'synced_files': synced_files
     }
 
+def is_url(s):
+    return s.startswith('http://') or s.startswith('https://')
+
+def convert_image_to_base64(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Ensure that the request was successful
+    return base64.b64encode(response.content).decode('utf-8')
+
+def process_image_fields(payload):
+    if 'init_images' in payload:
+        payload['init_images'] = [
+            convert_image_to_base64(image) if is_url(image) else image
+            for image in payload['init_images']
+        ]
+    
+    if 'mask' in payload and is_url(payload['mask']):
+        payload['mask'] = convert_image_to_base64(payload['mask'])
+
+    if 'alwayson_scripts' in payload:
+        if 'reactor' in payload['alwayson_scripts']:
+            first_arg = payload['alwayson_scripts']['reactor']['args'][0]
+            if is_url(first_arg):
+                payload['alwayson_scripts']['reactor']['args'][0] = convert_image_to_base64(first_arg)
+
+        if 'controlnet' in payload['alwayson_scripts']:
+            input_image = payload['alwayson_scripts']['controlnet']['args'][0]['input_image']
+            if is_url(input_image):
+                payload['alwayson_scripts']['controlnet']['args'][0]['input_image'] = convert_image_to_base64(input_image)
 
 # ---------------------------------------------------------------------------- #
 #                                RunPod Handler                                #
 # ---------------------------------------------------------------------------- #
 def handler(job):
-    validated_input = validate_input(job)
+    endpoint = job['input']['api']['endpoint']
+    method = job['input']['api']['method']
+    payload = job['input']['payload']
 
-    if 'errors' in validated_input:
-        return {
-            'error': '\n'.join(validated_input['errors'])
-        }
-
-    validated_api = validate_api(job)
-
-    if 'errors' in validated_api:
-        return {
-            'error': '\n'.join(validated_api['errors'])
-        }
-
-    endpoint, method, validated_payload = validate_payload(job)
-
-    if 'errors' in validated_payload:
-        return {
-            'error': '\n'.join(validated_payload['errors'])
-        }
-
-    if 'validated_input' in validated_payload:
-        payload = validated_payload['validated_input']
-    else:
-        payload = validated_payload
+    process_image_fields(payload)
 
     try:
         logger.info(f'Sending {method} request to: /{endpoint}', job['id'])
