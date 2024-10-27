@@ -188,14 +188,14 @@ def handler(job):
             return {
                 'error': f'A1111 status code: {response.status_code}',
                 'output': response.json(),
-                'refresh_worker': True
+                # 'refresh_worker': True # Triggers worker restart
             }
     except Exception as e:
         logger.error(f'An exception was raised: {e}')
 
         return {
             'error': traceback.format_exc(),
-            'refresh_worker': True
+            # 'refresh_worker': True # Triggers worker restart
         }
 
 
