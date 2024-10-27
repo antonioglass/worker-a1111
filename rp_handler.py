@@ -153,9 +153,9 @@ def process_image_fields(payload):
                 payload['alwayson_scripts']['reactor']['args'][0] = convert_image_to_base64(first_arg)
 
         if 'controlnet' in payload['alwayson_scripts']:
-            input_image = payload['alwayson_scripts']['controlnet']['args'][0]['input_image']
-            if is_url(input_image):
-                payload['alwayson_scripts']['controlnet']['args'][0]['input_image'] = convert_image_to_base64(input_image)
+            image = payload['alwayson_scripts']['controlnet']['args'][0]['image']
+            if is_url(image):
+                payload['alwayson_scripts']['controlnet']['args'][0]['image'] = convert_image_to_base64(image)
 
 # ---------------------------------------------------------------------------- #
 #                                RunPod Handler                                #
