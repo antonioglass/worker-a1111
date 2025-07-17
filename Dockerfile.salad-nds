@@ -1,14 +1,14 @@
 FROM antonioglass/worker-a1111:runpod-nds
 
-# Add RunPod Handler and Docker container start script
 WORKDIR /
-COPY start_salad.sh salad_handler.py ./
 
-# Add Salad Job Queue Worker
-ADD https://github.com/SaladTechnologies/salad-cloud-job-queue-worker/releases/download/v0.4.0/salad-http-job-queue-worker_x86_64.tar.gz /tmp
+ADD https://github.com/SaladTechnologies/salad-cloud-job-queue-worker/releases/download/v0.5.0/salad-http-job-queue-worker_x86_64.tar.gz /tmp
 RUN tar -C /usr/local/bin -zxpf /tmp/salad-http-job-queue-worker_x86_64.tar.gz && \
     rm -rf /tmp/salad-http-job-queue-worker_x86_64.tar.gz
 
-# Start the container
+COPY salad_handler.py /
+COPY start_salad.sh /
+
 RUN chmod +x /start_salad.sh
+
 ENTRYPOINT /start_salad.sh

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Body, HTTPException
 import os
 import time
 import requests
@@ -67,9 +67,9 @@ def send_post_request(endpoint, payload, retry=0):
 
     return response
 
-def download(job):
-    source_url = job['input']['payload']['source_url']
-    download_path = job['input']['payload']['download_path']
+def download(inp):
+    source_url = inp['payload']['source_url']
+    download_path = inp['payload']['download_path']
     process_id = os.getpid()
     temp_path = f"{download_path}.{process_id}"
 
@@ -91,10 +91,10 @@ def download(job):
     }
 
 
-def sync(job):
-    repo_id = job['input']['payload']['repo_id']
-    sync_path = job['input']['payload']['sync_path']
-    hf_token = job['input']['payload']['hf_token']
+def sync(inp):
+    repo_id = inp['payload']['repo_id']
+    sync_path = inp['payload']['sync_path']
+    hf_token = inp['payload']['hf_token']
 
     api = HfApi()
 
@@ -177,11 +177,13 @@ def reallocate_machine():
 # ---------------------------------------------------------------------------- #
 
 @app.post("/api")
-async def handler(request: Request):
-    job = await request.json()
-    endpoint = job['input']['api']['endpoint']
-    method = job['input']['api']['method']
-    payload = job['input']['payload']
+def handler(inp: dict = Body(...)):
+    if inp.get("probe") is True:
+        return {"probe": "ok"}
+
+    endpoint = inp['api']['endpoint']
+    method = inp['api']['method']
+    payload = inp['payload']
 
     process_image_fields(payload)
 
@@ -189,9 +191,9 @@ async def handler(request: Request):
         print(f'INFO: Sending {method} request to: /{endpoint}')
 
         if endpoint == 'v1/download':
-            return download(job)
+            return download(inp)
         elif endpoint == 'v1/sync':
-            return sync(job)
+            return sync(inp)
         elif method == 'GET':
             response = send_get_request(endpoint)
         elif method == 'POST':
