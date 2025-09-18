@@ -13,4 +13,4 @@ RUN chmod +x /start_salad.sh
 
 ENTRYPOINT /start_salad.sh
 
-# docker buildx build -f Dockerfile.salad-nds-xl -t antonioglass/worker-a1111:salad-nds-xl-1 . --platform linux/amd64
+# docker buildx build -f Dockerfile.salad-nds-xl -t antonioglass/worker-a1111:salad-nds-xl . --platform linux/amd64

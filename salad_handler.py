@@ -225,6 +225,44 @@ def handler(inp: dict = Body(...)):
         print(f'ERROR: An exception was raised on machine {machine_id}: {e}\n{error_trace}')
         raise HTTPException(status_code=500, detail=f"An internal server error occurred on machine on machine {machine_id}:\n{error_trace}")
 
+@app.get("/health")
+async def readiness_probe():
+    print("INFO: Checking health...")
+    try:
+        payload = {
+            "prompt": "cat",
+            "seed": -1,
+            "batch_size": 1,
+            "steps": 1,
+            "width": 512,
+            "height": 512,
+            "restore_faces": False,
+            "enable_hr": False
+        }
+
+        response = requests.post(
+            url=f'{BASE_URI}/sdapi/v1/txt2img',
+            json=payload,
+            timeout=TIMEOUT
+        )
+        
+        print(f"INFO: Received response with status code: {response.status_code}")
+
+        if response.status_code == 200:
+            print("INFO: Service is healthy")
+            return {"status": "ready"}
+        else:
+            print(f"WARNING: Health check failed, received status code {response.status_code}.")
+            raise HTTPException(status_code=503, detail="Service not ready")
+    
+    except requests.exceptions.RequestException as e:
+        print(f"ERROR: Connection error occurred while checking health: {e}")
+        raise HTTPException(status_code=503, detail="Service not available")
+    except Exception as e:
+        error_trace = traceback.format_exc()
+        print(f'ERROR: An exception occurred while checking health: {e}\n{error_trace}')
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 if __name__ == "__main__":
     wait_for_service(f'{BASE_URI}/sdapi/v1/sd-models')
     print('INFO: Automatic1111 API is ready')

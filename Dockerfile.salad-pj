@@ -12,3 +12,5 @@ COPY start_salad.sh /
 RUN chmod +x /start_salad.sh
 
 ENTRYPOINT /start_salad.sh
+
+# docker buildx build -f Dockerfile.salad-pj -t antonioglass/worker-a1111:salad-pj . --platform linux/amd64
