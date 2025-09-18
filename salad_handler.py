@@ -12,7 +12,7 @@ from huggingface_hub import HfApi
 app = FastAPI()
 
 BASE_URI = 'http://127.0.0.1:3000'
-TIMEOUT = 600
+TIMEOUT = int(os.environ.get('EXECUTION_TIMEOUT', '30'))
 POST_RETRIES = 3
 
 session = requests.Session()
@@ -202,8 +202,10 @@ def handler(inp: dict = Body(...)):
         response_json = response.json()
 
         if response.status_code == 200:
+            print('INFO: Request completed successfully')
             return response_json
         elif 'error' in response_json and response_json['error'] == 'RuntimeError':
+            print('ERROR: Runtime error detected, reallocating resources.')
             reallocate_machine()
             raise HTTPException(status_code=503, detail="Runtime error detected, reallocating resources.")
         else:
