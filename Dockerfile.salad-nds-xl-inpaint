@@ -1,0 +1,20 @@
+FROM antonioglass/worker-a1111:runpod-base-xl-1.0.1
+
+# Download Stable Diffusion models
+WORKDIR /stable-diffusion-webui/models/Stable-diffusion
+RUN wget https://huggingface.co/antonioglass/models/resolve/main/cyberrealisticPorn_v62_inpainting_vae.inpainting.safetensors
+
+WORKDIR /
+
+ADD https://github.com/SaladTechnologies/salad-cloud-job-queue-worker/releases/download/v0.5.0/salad-http-job-queue-worker_x86_64.tar.gz /tmp
+RUN tar -C /usr/local/bin -zxpf /tmp/salad-http-job-queue-worker_x86_64.tar.gz && \
+    rm -rf /tmp/salad-http-job-queue-worker_x86_64.tar.gz
+
+COPY salad_handler.py /
+COPY start_salad.sh /
+
+RUN chmod +x /start_salad.sh
+
+ENTRYPOINT /start_salad.sh
+
+# docker buildx build -f Dockerfile.salad-nds-xl-inpaint -t antonioglass/worker-a1111:salad-nds-xl-inpaint . --platform linux/amd64
